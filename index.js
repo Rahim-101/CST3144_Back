@@ -157,6 +157,43 @@ app.post('/orders', async (req, res) => {
   }
 });
 
+app.put('/lessons/:id', async (req, res) => {
+  try {
+    const lessonId = parseInt(req.params.id);
+    const { spaces } = req.body;
+    
+    console.log(`Updating lesson ${lessonId} with spaces: ${spaces}`);
+    
+    // Validate spaces
+    if (typeof spaces !== 'number' || spaces < 0) {
+      return res.status(400).json({ error: 'Spaces must be a non-negative number' });
+    }
+    
+    // Update lesson in database
+    const result = await db.collection('lessons').updateOne(
+      { id: lessonId },
+      { $set: { spaces: spaces } }
+    );
+    
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: 'Lesson not found' });
+    }
+    
+    // Fetch updated lesson
+    const updatedLesson = await db.collection('lessons').findOne({ id: lessonId });
+    
+    console.log('Lesson updated successfully:', updatedLesson);
+    
+    res.json({ 
+      message: 'Lesson updated successfully',
+      lesson: updatedLesson
+    });
+  } catch (error) {
+    console.error('Error updating lesson:', error);
+    res.status(500).json({ error: 'Failed to update lesson' });
+  }
+});
+
 // Connect to MongoDB and start server
 async function startServer() {
   try {
