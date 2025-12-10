@@ -34,12 +34,10 @@ This is the backend API for the Lesson Shop application, providing RESTful endpo
 - **Custom Middleware** (logger, static files, CORS)
 - **Data Validation** for all inputs
 - **Error Handling** with proper status codes
-- **Search Functionality** (bonus feature)
 
 ---
 
-## 🛠️ Technologies
-
+## 🛠️ 
 - Node.js
 - Express.js (v5.2.1)
 - MongoDB (v7.0.0)
@@ -48,16 +46,6 @@ This is the backend API for the Lesson Shop application, providing RESTful endpo
 
 ---
 
-## 🚀 Installation
-
-1. Clone repository
-2. Install dependencies: `npm install`
-3. Update MongoDB connection string in `index.js`
-4. Seed database: `node seed.js`
-5. Start server: `npm start`
-6. Server runs at: `http://localhost:3000`
-
----
 
 ## 📡 API Endpoints
 
@@ -81,38 +69,6 @@ Serve static images
 
 ---
 
-## 🗄️ Database Schema
-
-### Lessons Collection
-```json
-{
-  "id": 1,
-  "subject": "Math",
-  "location": "Hendon",
-  "price": 100,
-  "spaces": 10,
-  "image": "math.png"
-}
-```
-
-### Orders Collection
-```json
-{
-  "firstName": "John",
-  "lastName": "Doe",
-  "email": "john@example.com",
-  "phone": "1234567890",
-  "city": "London",
-  "country": "UK",
-  "address": "123 Main St",
-  "isGift": false,
-  "lessonType": "in-person",
-  "cart": [...],
-  "total": 200,
-  "createdAt": "2025-01-08T12:00:00.000Z"
-}
-```
-
 ---
 
 ## 📜 Development History
@@ -130,28 +86,32 @@ Serve static images
 
 ---
 
-## 🧪 Testing
+## 🌐 Live Deployment
 
-**cURL Examples:**
+**Backend API:** https://cst3144-back.onrender.com  
+**Frontend:** https://YOUR-USERNAME.github.io/YOUR-REPO-NAME/
 
-```bash
-# Get lessons
-curl http://localhost:3000/lessons
+**Live API Endpoints:**
+- Root: https://cst3144-back.onrender.com/
+- Get Lessons: https://cst3144-back.onrender.com/lessons
+- Post Orders: https://cst3144-back.onrender.com/orders
+- Update Lesson: https://cst3144-back.onrender.com/lessons/1
+- Search: https://cst3144-back.onrender.com/search?q=math
+- Images: https://cst3144-back.onrender.com/images/math.png
 
-# Create order
-curl -X POST http://localhost:3000/orders \
-  -H "Content-Type: application/json" \
-  -d '{"firstName":"John","lastName":"Doe",...}'
+---
 
-# Update spaces
-curl -X PUT http://localhost:3000/lessons/1 \
-  -H "Content-Type: application/json" \
-  -d '{"spaces":5}'
+## 🚀 Deployment
 
-# Search
-curl http://localhost:3000/search?q=math
+**Platform:** Render.com  
+**URL:** https://cst3144-back.onrender.com
+
+### Environment Variables:
+```
+PORT=10000 (auto-configured by Render)
 ```
 
+---
 
 ## 🤝 Contact
 
