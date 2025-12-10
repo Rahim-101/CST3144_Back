@@ -194,6 +194,35 @@ app.put('/lessons/:id', async (req, res) => {
   }
 });
 
+app.get('/search', async (req, res) => {
+  try {
+    const { q } = req.query;
+    
+    console.log(`Searching for: ${q}`);
+    
+    // If no query provided, return all lessons
+    if (!q || q.trim() === '') {
+      const lessons = await db.collection('lessons').find({}).toArray();
+      return res.json(lessons);
+    }
+    
+    // Search in subject and location using regex (case-insensitive)
+    const lessons = await db.collection('lessons').find({
+      $or: [
+        { subject: { $regex: q, $options: 'i' } },
+        { location: { $regex: q, $options: 'i' } }
+      ]
+    }).toArray();
+    
+    console.log(`Found ${lessons.length} lessons`);
+    
+    res.json(lessons);
+  } catch (error) {
+    console.error('Error searching lessons:', error);
+    res.status(500).json({ error: 'Search failed' });
+  }
+});
+
 // Connect to MongoDB and start server
 async function startServer() {
   try {
