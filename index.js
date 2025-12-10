@@ -2,13 +2,11 @@ const express = require('express');
 const { MongoClient } = require('mongodb');
 const cors = require('cors');
 const path = require('path');
-
 const app = express();
 const PORT = 3000;
 
-// MongoDB connection - REPLACE with your actual username and password
+// MongoDB connection 
 const MONGODB_URI = 'mongodb+srv://Rahim:Rahim90@lessonshop.luuxpoz.mongodb.net/?appName=LessonShop';
-
 const client = new MongoClient(MONGODB_URI);
 let db;
 
@@ -30,7 +28,13 @@ app.get('/', (req, res) => {
   res.json({ 
     message: 'Lesson Shop API',
     version: '1.0.0',
-    status: 'running'
+    status: 'running',
+    endpoints: {
+      lessons: 'GET /lessons',
+      search: 'GET /search?q=query',
+      orders: 'POST /orders',
+      updateLesson: 'PUT /lessons/:id'
+    }
   });
 });
 
@@ -58,65 +62,24 @@ app.post('/orders', async (req, res) => {
       return res.status(400).json({ error: 'All required fields must be filled' });
     }
     
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: 'Invalid email format' });
+    }
+    // Validate phone (digits only)
+    if (!/^\d+$/.test(phone)) {
+      return res.status(400).json({ error: 'Phone must contain only digits' });
+    }
     // Validate cart
     if (!cart || !Array.isArray(cart) || cart.length === 0) {
       console.log('Validation failed - invalid cart');
       return res.status(400).json({ error: 'Cart cannot be empty' });
     }
-    
-    // Create order object
-    const order = {
-      firstName,
-      lastName,
-      email,
-      phone,
-      city,
-      country,
-      address,
-      isGift: isGift || false,
-      lessonType,
-      cart,
-      total: total || 0,
-      createdAt: new Date()
-    };
-    
-    console.log('Inserting order:', order);
-    
-    // Insert order into database
-    const result = await db.collection('orders').insertOne(order);
-    
-    console.log('Order inserted successfully:', result.insertedId);
-    
-    res.status(201).json({ 
-      message: 'Order created successfully',
-      orderId: result.insertedId,
-      order: order
-    });
-  } catch (error) {
-    console.error('Error creating order:', error.message);
-    console.error('Full error:', error);
-    res.status(500).json({ 
-      error: 'Failed to create order',
-      details: error.message 
-    });
-  }
-});// POST /orders - Create new order
-app.post('/orders', async (req, res) => {
-  try {
-    console.log('Received order data:', req.body);
-    
-    const { firstName, lastName, email, phone, city, country, address, isGift, lessonType, cart, total } = req.body;
-    
-    // Validate required fields
-    if (!firstName || !lastName || !email || !phone || !city || !country || !address || !lessonType) {
-      console.log('Validation failed - missing fields');
-      return res.status(400).json({ error: 'All required fields must be filled' });
-    }
-    
-    // Validate cart
-    if (!cart || !Array.isArray(cart) || cart.length === 0) {
-      console.log('Validation failed - invalid cart');
-      return res.status(400).json({ error: 'Cart cannot be empty' });
+  
+    // Validate lesson type
+    if (lessonType !== 'in-person' && lessonType !== 'online') {
+      return res.status(400).json({ error: 'Lesson type must be either "in-person" or "online"' });
     }
     
     // Create order object
@@ -157,6 +120,7 @@ app.post('/orders', async (req, res) => {
   }
 });
 
+// PUT /lessons/:id - Update lesson spaces
 app.put('/lessons/:id', async (req, res) => {
   try {
     const lessonId = parseInt(req.params.id);
@@ -164,9 +128,14 @@ app.put('/lessons/:id', async (req, res) => {
     
     console.log(`Updating lesson ${lessonId} with spaces: ${spaces}`);
     
+    // Validate lesson ID
+    if (isNaN(lessonId)) {
+      return res.status(400).json({ error: 'Invalid lesson ID' });
+    }
+    
     // Validate spaces
-    if (typeof spaces !== 'number' || spaces < 0) {
-      return res.status(400).json({ error: 'Spaces must be a non-negative number' });
+    if (typeof spaces !== 'number' || spaces < 0 || !Number.isInteger(spaces)) {
+      return res.status(400).json({ error: 'Spaces must be a non-negative integer' });
     }
     
     // Update lesson in database
@@ -194,6 +163,7 @@ app.put('/lessons/:id', async (req, res) => {
   }
 });
 
+// GET /search - Search lessons
 app.get('/search', async (req, res) => {
   try {
     const { q } = req.query;
@@ -223,6 +193,24 @@ app.get('/search', async (req, res) => {
   }
 });
 
+// 404 handler - must be after all routes
+app.use((req, res) => {
+  res.status(404).json({ 
+    error: 'Route not found',
+    path: req.url,
+    method: req.method
+  });
+});
+
+// Global error handler - must be last
+app.use((err, req, res, next) => {
+  console.error('Global error handler:', err);
+  res.status(500).json({ 
+    error: 'Internal server error',
+    message: err.message 
+  });
+});
+
 // Connect to MongoDB and start server
 async function startServer() {
   try {
@@ -230,8 +218,13 @@ async function startServer() {
     db = client.db('lessonshop');
     console.log('✓ Connected to MongoDB');
     
+    // Test database connection
+    await db.command({ ping: 1 });
+    console.log('✓ Database ping successful');
+    
     app.listen(PORT, () => {
       console.log(`✓ Server running on http://localhost:${PORT}`);
+      console.log(`✓ Environment: ${process.env.NODE_ENV || 'development'}`);
     });
   } catch (error) {
     console.error('✗ MongoDB connection error:', error.message);
