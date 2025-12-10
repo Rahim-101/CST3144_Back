@@ -45,6 +45,118 @@ app.get('/lessons', async (req, res) => {
   }
 });
 
+// POST /orders - Create new order
+app.post('/orders', async (req, res) => {
+  try {
+    console.log('Received order data:', req.body);
+    
+    const { firstName, lastName, email, phone, city, country, address, isGift, lessonType, cart, total } = req.body;
+    
+    // Validate required fields
+    if (!firstName || !lastName || !email || !phone || !city || !country || !address || !lessonType) {
+      console.log('Validation failed - missing fields');
+      return res.status(400).json({ error: 'All required fields must be filled' });
+    }
+    
+    // Validate cart
+    if (!cart || !Array.isArray(cart) || cart.length === 0) {
+      console.log('Validation failed - invalid cart');
+      return res.status(400).json({ error: 'Cart cannot be empty' });
+    }
+    
+    // Create order object
+    const order = {
+      firstName,
+      lastName,
+      email,
+      phone,
+      city,
+      country,
+      address,
+      isGift: isGift || false,
+      lessonType,
+      cart,
+      total: total || 0,
+      createdAt: new Date()
+    };
+    
+    console.log('Inserting order:', order);
+    
+    // Insert order into database
+    const result = await db.collection('orders').insertOne(order);
+    
+    console.log('Order inserted successfully:', result.insertedId);
+    
+    res.status(201).json({ 
+      message: 'Order created successfully',
+      orderId: result.insertedId,
+      order: order
+    });
+  } catch (error) {
+    console.error('Error creating order:', error.message);
+    console.error('Full error:', error);
+    res.status(500).json({ 
+      error: 'Failed to create order',
+      details: error.message 
+    });
+  }
+});// POST /orders - Create new order
+app.post('/orders', async (req, res) => {
+  try {
+    console.log('Received order data:', req.body);
+    
+    const { firstName, lastName, email, phone, city, country, address, isGift, lessonType, cart, total } = req.body;
+    
+    // Validate required fields
+    if (!firstName || !lastName || !email || !phone || !city || !country || !address || !lessonType) {
+      console.log('Validation failed - missing fields');
+      return res.status(400).json({ error: 'All required fields must be filled' });
+    }
+    
+    // Validate cart
+    if (!cart || !Array.isArray(cart) || cart.length === 0) {
+      console.log('Validation failed - invalid cart');
+      return res.status(400).json({ error: 'Cart cannot be empty' });
+    }
+    
+    // Create order object
+    const order = {
+      firstName,
+      lastName,
+      email,
+      phone,
+      city,
+      country,
+      address,
+      isGift: isGift || false,
+      lessonType,
+      cart,
+      total: total || 0,
+      createdAt: new Date()
+    };
+    
+    console.log('Inserting order:', order);
+    
+    // Insert order into database
+    const result = await db.collection('orders').insertOne(order);
+    
+    console.log('Order inserted successfully:', result.insertedId);
+    
+    res.status(201).json({ 
+      message: 'Order created successfully',
+      orderId: result.insertedId,
+      order: order
+    });
+  } catch (error) {
+    console.error('Error creating order:', error.message);
+    console.error('Full error:', error);
+    res.status(500).json({ 
+      error: 'Failed to create order',
+      details: error.message 
+    });
+  }
+});
+
 // Connect to MongoDB and start server
 async function startServer() {
   try {
