@@ -89,7 +89,6 @@ Serve static images
 ## 🌐 Live Deployment
 
 **Backend API:** https://cst3144-back.onrender.com  
-**Frontend:** https://YOUR-USERNAME.github.io/YOUR-REPO-NAME/
 
 **Live API Endpoints:**
 - Root: https://cst3144-back.onrender.com/
